@@ -3,6 +3,8 @@ export default () => ({
 
   port: parseInt(process.env.PORT || '5432'),
 
+  appUrl: process.env.APP_URL,
+
   database: {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT || '5432'),
@@ -24,7 +26,7 @@ export default () => ({
 
   paystack: {
     url: process.env.PAYSTACK_BASE_URL,
-    public_key: process.env.PAYSTACK_PUBLIC_KEY,
-    secret_key: process.env.PAYSTACK_SECRET_KEY,
+    publicKey: process.env.PAYSTACK_PUBLIC_KEY,
+    secretKey: process.env.PAYSTACK_SECRET_KEY,
   },
 });

@@ -10,7 +10,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ApiKey, ApiKeyPermission } from 'src/api-key/entities/api-key.entity';
-import { User } from 'src/auth/entities/user.entity';
 import { PERMISSIONS_KEY } from '../decorators/require-permissions.decorator';
 import { RequestWithUser } from 'src/types/express-request-with-user';
 
@@ -19,8 +18,6 @@ export class ApiKeyGuard implements CanActivate {
   constructor(
     @InjectRepository(ApiKey)
     private readonly apiKeyRepository: Repository<ApiKey>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly reflector: Reflector, // Used to read @RequirePermissions metadata
   ) {}
 
@@ -91,7 +88,11 @@ export class ApiKeyGuard implements CanActivate {
 
     // Step 7: Attach user to request (so @CurrentUser() works)
     // Type-safe: request is RequestWithUser, so request.user expects User entity
-    request.user = matchedApiKey.user;
+    request.user = request.user = {
+      sub: matchedApiKey.user.id,
+      userId: matchedApiKey.user.id,
+      email: matchedApiKey.user.email,
+    };
 
     // Authentication and authorization successful!
     return true;

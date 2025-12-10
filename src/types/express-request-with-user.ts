@@ -1,6 +1,6 @@
 import { Request } from 'express';
-import { User } from 'src/auth/entities/user.entity';
+import { PayloadType } from 'src/interface/payload-types';
 
 export interface RequestWithUser extends Request {
-  user: User;
+  user: PayloadType;
 }
