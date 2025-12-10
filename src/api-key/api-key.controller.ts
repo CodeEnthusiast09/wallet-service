@@ -12,7 +12,6 @@ import { RolloverApiKeyDto } from './dto/rollover-api-key.dto';
 import { ApiKeyResponseDto } from './dto/api-key-response.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { User } from 'src/auth/entities/user.entity';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -20,6 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { PayloadType } from 'src/interface/payload-types';
 
 @ApiTags('API Keys')
 @Controller('keys')
@@ -43,10 +43,10 @@ export class ApiKeyController {
   @ApiResponse({ status: 401, description: 'Unauthorized - JWT required' })
   @ApiResponse({ status: 403, description: 'Maximum 5 active keys reached' })
   async create(
-    @CurrentUser() user: User,
+    @CurrentUser() user: PayloadType,
     @Body() dto: CreateApiKeyDto,
   ): Promise<ApiKeyResponseDto> {
-    return this.apiKeyService.create(user.id, dto);
+    return this.apiKeyService.create(user.userId, dto);
   }
 
   @Post('rollover')
@@ -64,10 +64,10 @@ export class ApiKeyController {
   @ApiResponse({ status: 401, description: 'Unauthorized - JWT required' })
   @ApiResponse({ status: 404, description: 'Expired key not found' })
   async rollover(
-    @CurrentUser() user: User,
+    @CurrentUser() user: PayloadType,
     @Body() dto: RolloverApiKeyDto,
   ): Promise<ApiKeyResponseDto> {
-    return this.apiKeyService.rollover(user.id, dto);
+    return this.apiKeyService.rollover(user.userId, dto);
   }
 
   @Delete(':keyId/revoke')
@@ -80,10 +80,10 @@ export class ApiKeyController {
   @ApiResponse({ status: 401, description: 'Unauthorized - JWT required' })
   @ApiResponse({ status: 404, description: 'API key not found' })
   async revoke(
-    @CurrentUser() user: User,
+    @CurrentUser() user: PayloadType,
     @Param('keyId') keyId: string,
   ): Promise<{ message: string }> {
-    await this.apiKeyService.revoke(user.id, keyId);
+    await this.apiKeyService.revoke(user.userId, keyId);
     return { message: 'API key revoked successfully' };
   }
 }
