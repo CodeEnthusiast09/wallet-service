@@ -6,6 +6,10 @@
 
 A production-ready backend wallet service built with NestJS, featuring Paystack payment integration, JWT authentication, and API key management for service-to-service communication.
 
+## 🌐 Live Demo
+**Live API**: https://wallet-service-production-a3df.up.railway.app
+**API Documentation**: https://wallet-service-production-a3df.up.railway.app/api/docs
+
 ## Features
 
 - 🔐 **Google OAuth Authentication** - Secure user login with JWT tokens
@@ -36,7 +40,7 @@ A production-ready backend wallet service built with NestJS, featuring Paystack 
 
 ### 1. Clone the repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/CodeEnthusiast09/wallet-service
 cd wallet-service
 ```
 
