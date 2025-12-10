@@ -61,21 +61,7 @@ export class WalletController {
   async getBalance(
     @CurrentUser() user: PayloadType,
   ): Promise<BalanceResponseDto> {
-    console.log('=== BALANCE REQUEST DEBUG ===');
-    console.log('User from @CurrentUser:', {
-      id: user.userId,
-      email: user.email,
-      // wallet: user.wallet?.walletNumber,
-    });
-
     const wallet = await this.walletService.getWalletByUserId(user.userId);
-
-    console.log('Wallet retrieved:', {
-      id: wallet.id,
-      userId: wallet.userId,
-      balance: wallet.balance,
-      walletNumber: wallet.walletNumber,
-    });
 
     return { balance: Number(wallet.balance) };
   }

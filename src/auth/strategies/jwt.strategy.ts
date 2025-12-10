@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: PayloadType): Promise<User> {
+  async validate(payload: PayloadType): Promise<PayloadType> {
     // Extract user ID from payload
     // We support both 'sub' (JWT standard) and 'userId' (our custom field)
     const userId = payload.sub || payload.userId;
@@ -45,6 +45,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     // Return the full user entity
     // This will be attached to request.user by JwtAuthGuard
-    return user;
+    return payload;
   }
 }
