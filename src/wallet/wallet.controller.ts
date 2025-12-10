@@ -22,7 +22,16 @@ import { TransactionType } from '../transaction/entities/transaction.entity';
 import { OptionalAuthGuard } from 'src/common/guards/optional-auth.guard';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
 import { ApiKeyPermission } from 'src/api-key/entities/api-key.entity';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Wallet')
 @Controller('wallet')
 export class WalletController {
   constructor(
@@ -34,16 +43,60 @@ export class WalletController {
   @UseGuards(OptionalAuthGuard)
   @RequirePermissions(ApiKeyPermission.READ)
   @Get('balance')
+  @ApiBearerAuth('JWT-auth')
+  @ApiSecurity('API-Key')
+  @ApiOperation({
+    summary: 'Get wallet balance',
+    description:
+      'Retrieve current wallet balance. Requires JWT or API key with READ permission.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Balance retrieved successfully',
+    type: BalanceResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @Get('balance')
   async getBalance(
     @CurrentUser() user: PayloadType,
   ): Promise<BalanceResponseDto> {
+    console.log('=== BALANCE REQUEST DEBUG ===');
+    console.log('User from @CurrentUser:', {
+      id: user.userId,
+      email: user.email,
+      // wallet: user.wallet?.walletNumber,
+    });
+
     const wallet = await this.walletService.getWalletByUserId(user.userId);
+
+    console.log('Wallet retrieved:', {
+      id: wallet.id,
+      userId: wallet.userId,
+      balance: wallet.balance,
+      walletNumber: wallet.walletNumber,
+    });
+
     return { balance: Number(wallet.balance) };
   }
 
   @UseGuards(OptionalAuthGuard)
   @RequirePermissions(ApiKeyPermission.DEPOSIT)
   @Post('deposit')
+  @ApiBearerAuth('JWT-auth')
+  @ApiSecurity('API-Key')
+  @ApiOperation({
+    summary: 'Initialize deposit',
+    description:
+      'Initialize a Paystack payment for wallet deposit. Returns payment URL. Requires JWT or API key with DEPOSIT permission.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Deposit initialized successfully',
+    type: DepositResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid amount or Paystack error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async deposit(
     @CurrentUser() user: PayloadType,
     @Body() depositDto: DepositDto,
@@ -74,6 +127,24 @@ export class WalletController {
   @UseGuards(OptionalAuthGuard)
   @RequirePermissions(ApiKeyPermission.TRANSFER)
   @Post('transfer')
+  @ApiBearerAuth('JWT-auth')
+  @ApiSecurity('API-Key')
+  @ApiOperation({
+    summary: 'Transfer to another wallet',
+    description:
+      'Send money from your wallet to another user. Requires JWT or API key with TRANSFER permission.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Transfer completed successfully',
+    type: TransferResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Insufficient balance or invalid wallet number',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Recipient wallet not found' })
   async transfer(
     @CurrentUser() user: PayloadType,
     @Body() transferDto: TransferDto,
@@ -88,6 +159,19 @@ export class WalletController {
   @UseGuards(OptionalAuthGuard)
   @RequirePermissions(ApiKeyPermission.READ)
   @Get('transactions')
+  @ApiBearerAuth('JWT-auth')
+  @ApiSecurity('API-Key')
+  @ApiOperation({
+    summary: 'Get transaction history',
+    description:
+      'Retrieve all transactions for the authenticated user. Requires JWT or API key with READ permission.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Transactions retrieved successfully',
+    type: [TransactionResponseDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getTransactions(
     @CurrentUser() user: PayloadType,
   ): Promise<TransactionResponseDto[]> {
@@ -103,6 +187,24 @@ export class WalletController {
   }
 
   @Get('deposit/:reference/status')
+  @ApiOperation({
+    summary: 'Check deposit status',
+    description:
+      'Check the status of a deposit transaction. No authentication required (used as Paystack callback).',
+  })
+  @ApiParam({ name: 'reference', example: 'dep_1765327886986_b58962b0' })
+  @ApiResponse({
+    status: 200,
+    description: 'Transaction status retrieved',
+    schema: {
+      example: {
+        reference: 'dep_1765327886986_b58962b0',
+        status: 'success',
+        amount: 5000,
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Transaction not found' })
   async getDepositStatus(@Param('reference') reference: string) {
     const transaction =
       await this.transactionService.findByReference(reference);

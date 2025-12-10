@@ -1,13 +1,13 @@
 {
   "info": {
-    "name": "Wallet Service API",
+    "name": "Wallet Service API (live)",
     "description": "Complete API collection for Wallet Service with JWT and API Key authentication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000",
+      "value": "https://wallet-service-production-a3df.up.railway.app",
       "type": "string"
     },
     {

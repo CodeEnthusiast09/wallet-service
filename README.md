@@ -2,97 +2,418 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# Wallet Service API
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A production-ready backend wallet service built with NestJS, featuring Paystack payment integration, JWT authentication, and API key management for service-to-service communication.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- 🔐 **Google OAuth Authentication** - Secure user login with JWT tokens
+- 💰 **Wallet Operations** - Deposits, transfers, balance checks, transaction history
+- 💳 **Paystack Integration** - Seamless payment processing with webhook support
+- 🔑 **API Key System** - Service-to-service authentication with granular permissions
+- 🛡️ **Security** - Webhook signature validation, bcrypt hashing, permission-based access
+- 📊 **Transaction Management** - Complete audit trail with idempotent operations
+- 📚 **API Documentation** - Interactive Swagger/OpenAPI docs
 
-## Project setup
+## Tech Stack
 
+- **Framework:** NestJS (Node.js)
+- **Database:** PostgreSQL with TypeORM
+- **Authentication:** Passport.js (Google OAuth 2.0, JWT)
+- **Payment:** Paystack
+- **Documentation:** Swagger/OpenAPI
+- **Validation:** class-validator, class-transformer
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- PostgreSQL (v14 or higher)
+- Paystack account (test mode is fine)
+- Google OAuth credentials
+
+## Installation
+
+### 1. Clone the repository
 ```bash
-$ npm install
+git clone <repository-url>
+cd wallet-service
 ```
 
-## Compile and run the project
-
+### 2. Install dependencies
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 3. Environment Configuration
 
-```bash
-# unit tests
-$ npm run test
+Create a `.env` file in the root directory:
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
+DB_DATABASE=wallet_service_db
 
-# e2e tests
-$ npm run test:e2e
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRATION=7d
 
-# test coverage
-$ npm run test:cov
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# Paystack
+PAYSTACK_BASE_URL=https://api.paystack.co
+PAYSTACK_SECRET_KEY=sk_test_your_paystack_secret_key
+PAYSTACK_PUBLIC_KEY=pk_test_your_paystack_public_key
+
+# App
+PORT=3000
+APP_URL=http://localhost:3000
+NODE_ENV=development
 ```
 
-## Deployment
+### 4. Database Setup
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+Create the PostgreSQL database:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+psql -U postgres
+CREATE DATABASE wallet_service_db;
+\q
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The application will automatically create tables on first run (via TypeORM synchronize).
 
-## Resources
+### 5. Google OAuth Setup
 
-Check out a few resources that may come in handy when working with NestJS:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable **Google+ API**
+4. Create OAuth 2.0 credentials (Web application)
+5. Add authorized redirect URI: `http://localhost:3000/auth/google/callback`
+6. Copy Client ID and Client Secret to `.env`
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 6. Paystack Setup
 
-## Support
+1. Sign up at [Paystack](https://paystack.com)
+2. Get your test API keys from Settings → API Keys & Webhooks
+3. Copy keys to `.env`
+4. **For webhook testing:**
+   - Install ngrok: `npm install -g ngrok`
+   - Run: `ngrok http 3000`
+   - Copy the HTTPS URL
+   - Add webhook URL in Paystack dashboard: `https://your-ngrok-url.ngrok-free.app/wallet/paystack/webhook`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Running the Application
 
-## Stay in touch
+### Development Mode
+```bash
+npm run start:dev
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The server will start on `http://localhost:3000`
 
-## License
+### Production Mode
+```bash
+npm run build
+npm run start:prod
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## API Documentation
+
+Interactive API documentation is available at:
+
+**Swagger UI:** `http://localhost:3000/api/docs`
+
+## API Overview
+
+### Authentication
+
+#### Google OAuth Login
+```bash
+GET /auth/google
+```
+
+Redirects to Google OAuth consent page. Use in a browser.
+
+**Response (after successful login):**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "41458da0-4b43-4661-9a57-85ceb53482d6",
+    "email": "user@example.com",
+    "walletNumber": "4566678954356"
+  }
+}
+```
+
+### Wallet Operations
+
+All wallet endpoints accept **either** JWT (Bearer token) **or** API Key (`x-api-key` header).
+
+#### Get Wallet Balance
+```bash
+GET /wallet/balance
+Authorization: Bearer <jwt_token>
+# OR
+x-api-key: <api_key>
+```
+
+**Response:**
+```json
+{
+  "balance": 15000
+}
+```
+
+#### Initialize Deposit
+```bash
+POST /wallet/deposit
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "amount": 5000
+}
+```
+
+**Response:**
+```json
+{
+  "reference": "dep_1765327886986_b58962b0",
+  "authorization_url": "https://checkout.paystack.com/xyz123"
+}
+```
+
+**Flow:**
+1. User receives payment URL
+2. User completes payment on Paystack
+3. Paystack sends webhook to your server
+4. Wallet is credited automatically
+
+#### Transfer to Another Wallet
+```bash
+POST /wallet/transfer
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "wallet_number": "4566678954356",
+  "amount": 1000
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Transfer completed",
+  "transactionId": "41458da0-4b43-4661-9a57-85ceb53482d6"
+}
+```
+
+#### Get Transaction History
+```bash
+GET /wallet/transactions
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "41458da0-4b43-4661-9a57-85ceb53482d6",
+    "type": "deposit",
+    "amount": 5000,
+    "status": "success",
+    "reference": "dep_1765327886986_b58962b0",
+    "createdAt": "2025-12-10T01:05:58.000Z"
+  },
+  {
+    "id": "51458da0-4b43-4661-9a57-85ceb53482d7",
+    "type": "transfer",
+    "amount": 1000,
+    "status": "success",
+    "recipientWalletId": "61458da0-4b43-4661-9a57-85ceb53482d8",
+    "createdAt": "2025-12-10T02:10:30.000Z"
+  }
+]
+```
+
+#### Check Deposit Status
+```bash
+GET /wallet/deposit/{reference}/status
+```
+
+No authentication required. Used as Paystack callback URL.
+
+### API Key Management
+
+API keys allow service-to-service authentication with granular permissions.
+
+#### Create API Key
+```bash
+POST /keys/create
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "name": "wallet-service",
+  "permissions": ["deposit", "transfer", "read"],
+  "expiry": "1D"
+}
+```
+
+**Expiry Options:** `1H` (1 hour), `1D` (1 day), `1M` (1 month), `1Y` (1 year)
+
+**Permissions:**
+- `read` - View balance and transactions
+- `deposit` - Initialize deposits
+- `transfer` - Transfer funds
+
+**Response:**
+```json
+{
+  "api_key": "sk_live_abc123xyz...",
+  "expires_at": "2025-12-11T01:05:58.000Z"
+}
+```
+
+⚠️ **Important:** Save the API key securely. It cannot be retrieved again.
+
+#### Rollover Expired API Key
+```bash
+POST /keys/rollover
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "expired_key_id": "41458da0-4b43-4661-9a57-85ceb53482d6",
+  "expiry": "1M"
+}
+```
+
+Creates a new key with the same permissions as the expired one.
+
+#### Revoke API Key
+```bash
+DELETE /keys/{keyId}/revoke
+Authorization: Bearer <jwt_token>
+```
+
+Permanently disables an API key.
+
+### Webhooks
+
+Paystack webhook endpoint (called automatically by Paystack):
+```bash
+POST /wallet/paystack/webhook
+x-paystack-signature: <signature>
+```
+
+This endpoint is secured with HMAC signature validation and processes payment notifications.
+
+## Testing
+
+### Manual Testing with cURL
+
+**1. Login and get JWT:**
+```bash
+# Open in browser
+open http://localhost:3000/auth/google
+# Copy the access_token from response
+```
+
+**2. Check balance:**
+```bash
+curl -X GET http://localhost:3000/wallet/balance \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**3. Create API key:**
+```bash
+curl -X POST http://localhost:3000/keys/create \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "test-key",
+    "permissions": ["read", "deposit", "transfer"],
+    "expiry": "1D"
+  }'
+```
+
+**4. Use API key:**
+```bash
+curl -X GET http://localhost:3000/wallet/balance \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+### Testing with Postman
+
+Import the `postman-collection.json` file included in the repository for a complete test suite.
+
+### Testing Paystack Webhooks Locally
+
+1. **Start ngrok:**
+```bash
+ngrok http 3000
+```
+
+2. **Update Paystack webhook URL:**
+   - Go to Paystack Dashboard → Settings → Webhooks
+   - Set URL to: `https://YOUR_NGROK_URL.ngrok-free.app/wallet/paystack/webhook`
+
+3. **Make a test payment:**
+   - Use Paystack test card: `4084084084084081`
+   - Expiry: Any future date
+   - CVV: Any 3 digits
+
+4. **Verify webhook:**
+   - Check your terminal logs for webhook confirmation
+   - Check wallet balance - it should be updated
+
+## Project Structure
+```
+src/
+├── api-key/           # API key management
+│   ├── dto/
+│   ├── entities/
+│   ├── api-key.controller.ts
+│   └── api-key.service.ts
+├── auth/              # Authentication
+│   ├── strategies/
+│   ├── entities/
+│   ├── auth.controller.ts
+│   └── auth.service.ts
+├── wallet/            # Wallet operations
+│   ├── dto/
+│   ├── entities/
+│   ├── wallet.controller.ts
+│   └── wallet.service.ts
+├── transaction/       # Transaction management
+│   ├── dto/
+│   ├── entities/
+│   └── transaction.service.ts
+├── paystack/          # Payment processing
+│   ├── paystack.controller.ts
+│   └── paystack.service.ts
+├── common/            # Shared resources
+│   ├── guards/       # Auth guards
+│   └── decorators/   # Custom decorators
+└── main.ts           # Application entry point
+```
+
+## Security Considerations
+
+- ✅ JWT tokens expire after 7 days (configurable)
+- ✅ API keys are hashed with bcrypt (never stored in plain text)
+- ✅ Webhook signatures are validated using HMAC-SHA512
+- ✅ Maximum 5 active API keys per user
+- ✅ Permission-based access control for API keys
+- ✅ Idempotent webhook processing (prevents double-crediting)
+- ✅ Atomic database transactions for transfers
+- ✅ Input validation on all endpoints
