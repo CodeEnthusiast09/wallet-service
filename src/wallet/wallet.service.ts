@@ -102,7 +102,7 @@ export class WalletService {
     senderUserId: string,
     recipientWalletNumber: string,
     amount: number,
-  ): Promise<{ status: string; message: string; transactionId: string }> {
+  ): Promise<{ status: string; message: string }> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -159,7 +159,6 @@ export class WalletService {
       return {
         status: 'success',
         message: 'Transfer completed',
-        transactionId: transaction.id,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();

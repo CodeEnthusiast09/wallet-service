@@ -96,13 +96,9 @@ export class WalletController {
       await this.transactionService.getTransactionsByWalletId(wallet.id);
 
     return transactions.map((t) => ({
-      id: t.id,
       type: t.type,
       amount: Number(t.amount),
       status: t.status,
-      reference: t.reference,
-      recipientWalletId: t.recipientWalletId,
-      createdAt: t.createdAt,
     }));
   }
 
